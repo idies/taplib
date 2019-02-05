@@ -1,6 +1,8 @@
 package adql.translator;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import adql.db.DBColumn;
 import adql.db.DBType;
@@ -17,6 +19,8 @@ import adql.query.from.ADQLJoin;
 import adql.query.from.ADQLTable;
 import adql.query.from.FromContent;
 import adql.query.operand.ADQLColumn;
+import adql.query.operand.ADQLOperand;
+import adql.query.operand.Concatenation;
 import adql.query.operand.function.MathFunction;
 import adql.query.operand.function.geometry.AreaFunction;
 import adql.query.operand.function.geometry.BoxFunction;
@@ -30,6 +34,8 @@ import adql.query.operand.function.geometry.IntersectsFunction;
 import adql.query.operand.function.geometry.PointFunction;
 import adql.query.operand.function.geometry.PolygonFunction;
 import adql.query.operand.function.geometry.RegionFunction;
+
+
 
 /**
  * <p>MS SQL Server translator.</p>
@@ -311,6 +317,17 @@ public class SQLServerTranslator extends JDBCTranslator {
 	@Override
 	public String translate(final RegionFunction region) throws TranslationException{
 		return getDefaultADQLFunction(region);
+	}
+
+	@Override
+	public String translate(Concatenation concat) throws TranslationException {
+		List<String> translated = new ArrayList<>();
+
+		Iterator<ADQLOperand> it = concat.iterator();
+		while (it.hasNext())
+			translated.add(translate(it.next()));
+
+		return String.join(" + ", translated);
 	}
 
 	@Override
