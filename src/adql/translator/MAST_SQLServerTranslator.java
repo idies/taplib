@@ -110,8 +110,10 @@ public class MAST_SQLServerTranslator extends SQLServerTranslator {
 	private String QualifyUserFunctionNames(String input) {
 		if( CatalogUserFunctionNames == null ) return input;
 		for (int iFunctionName = 0; iFunctionName < CatalogUserFunctionNames.length; ++iFunctionName){	
-			if(input.contains(CatalogUserFunctionNames[iFunctionName]))
+			if(input.contains(CatalogUserFunctionNames[iFunctionName])) {
 				input = input.replace(CatalogUserFunctionNames[iFunctionName], "dbo." + CatalogUserFunctionNames[iFunctionName]);
+				input = input.replace("dbo.dbo.", "dbo.");
+			}
 		}
 		return input;
 	}
