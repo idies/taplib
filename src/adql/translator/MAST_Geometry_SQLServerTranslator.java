@@ -28,10 +28,13 @@ import java.util.List;
  */
 
 import adql.db.STCS.Region;
+import adql.db.exception.UnresolvedJoinException;
 import adql.parser.SQLServer_ADQLQueryFactory;
 import adql.query.ADQLList;
 import adql.query.ADQLObject;
+import adql.query.ADQLOrder;
 import adql.query.ADQLQuery;
+import adql.query.ClauseADQL;
 import adql.query.ClauseConstraints;
 import adql.query.ClauseSelect;
 import adql.query.constraint.Comparison;
@@ -335,11 +338,17 @@ public class MAST_Geometry_SQLServerTranslator extends SQLServerTranslator {
 				sql.append('\n').append(geomReplace);
 			}
 
-			if (!query.getOrderBy().isEmpty()) {
-				geomReplace = translate(query.getOrderBy());
-				geomReplace = ReplaceTableNames(geomReplace, functionTableName);
-				sql.append('\n').append(geomReplace);
+			//If no order by is given, create a default to have deterministic results in geometry responses.
+			if(query.getOrderBy().isEmpty()) {
+				ClauseADQL<ADQLOrder> newOrderBy = new ClauseADQL<ADQLOrder>("ORDER BY");													
+				ADQLOrder defaultGeometryOrder = new ADQLOrder(functionTableName + ".distance");
+				newOrderBy.add(defaultGeometryOrder);				
+				query.setOrderBy(newOrderBy);				
 			}
+			geomReplace = translate(query.getOrderBy());
+			geomReplace = ReplaceTableNames(geomReplace, functionTableName);
+			sql.append('\n').append(geomReplace);
+			
 			String sqlString = sql.toString();
 			return QualifyUserFunctionNames(sqlString);
 		} 
